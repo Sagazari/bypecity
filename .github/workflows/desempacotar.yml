@@ -1,11 +1,10 @@
 
-name: Desempacotar ZIP automaticamente
+name: Desempacotar Bype
 
 on:
   push:
     paths:
-      - '*.zip'
-      - '**/*.zip'
+      - "bype-eleicoes.zip"
 
 permissions:
   contents: write
@@ -17,16 +16,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extrair ZIP
+      - name: Extrair arquivos na raiz
         run: |
-          find . -type f -name "*.zip" -print0 | while IFS= read -r -d '' file; do
-            unzip -o "$file" -d .
-          done
+          mkdir -p "$RUNNER_TEMP/bype-extract"
+
+          unzip -o bype-eleicoes.zip -d "$RUNNER_TEMP/bype-extract"
+
+          cp -a "$RUNNER_TEMP/bype-extract/bype-eleicoes/." .
 
       - name: Salvar arquivos
         run: |
-          git config user.name "mavero-bot"
-          git config user.email "bot@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add -A
-          git diff --cached --quiet || git commit -m "Arquivos desempacotados"
+          git diff --cached --quiet || git commit -m "Desempacotar projeto Bype"
           git push
