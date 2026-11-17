@@ -4,7 +4,7 @@ name: Desempacotar Bype
 on:
   push:
     paths:
-      - "bype-eleicoes.zip"
+      - "bype-city.zip"
 
 permissions:
   contents: write
@@ -20,9 +20,9 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/bype-extract"
 
-          unzip -o bype-eleicoes.zip -d "$RUNNER_TEMP/bype-extract"
+          unzip -o bype-city.zip -d "$RUNNER_TEMP/bype-extract"
 
-          cp -a "$RUNNER_TEMP/bype-extract/bype-eleicoes/." .
+          cp -a "$RUNNER_TEMP/bype-extract/bype-city/." .
 
       - name: Salvar arquivos
         run: |
