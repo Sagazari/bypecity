@@ -1,10 +1,11 @@
 
-name: Desempacotar Bype
+name: Desempacotar ZIP automaticamente
 
 on:
   push:
     paths:
-      - "bype-city.zip"
+      - "**.zip"
+      - ".github/workflows/desempacotar.yml"
 
 permissions:
   contents: write
@@ -14,21 +15,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Baixar repositório
+        uses: actions/checkout@v4
 
-      - name: Extrair arquivos na raiz
+      - name: Extrair arquivos do ZIP
+        shell: bash
         run: |
-          mkdir -p "$RUNNER_TEMP/bype-extract"
+          set -e
+          shopt -s nullglob
 
-          unzip -o bype-city.zip -d "$RUNNER_TEMP/bype-extract"
+          zips=( *.zip )
 
-          cp -a "$RUNNER_TEMP/bype-extract/bype-city/." .
+          if [ ${#zips[@]} -eq 0 ]; then
+            echo "Nenhum ZIP encontrado na raiz."
+            exit 1
+          fi
 
-      - name: Salvar arquivos
+          mkdir -p /tmp/bype-extract
+
+          for archive in "${zips[@]}"; do
+            echo "Extraindo: $archive"
+            unzip -o "$archive" -d /tmp/bype-extract
+          done
+
+          if [ -d /tmp/bype-extract/bype-eleicoes ]; then
+            cp -a /tmp/bype-extract/bype-eleicoes/. .
+          else
+            echo "Pasta interna bype-eleicoes não encontrada."
+            exit 1
+          fi
+
+      - name: Salvar arquivos no GitHub
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "mavero-bot"
+          git config user.email "bot@users.noreply.github.com"
 
           git add -A
-          git diff --cached --quiet || git commit -m "Desempacotar projeto Bype"
+          git diff --cached --quiet || git commit -m "Arquivos atualizados automaticamente"
           git push
